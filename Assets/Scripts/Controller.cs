@@ -4,10 +4,9 @@ using UnityEngine;
 public class Controller : MonoBehaviour
 {
     [SerializeField] private float ForwardSpeed;
-    [SerializeField] private AudioSource move;
-    [SerializeField] private AudioSource reachedEnd;
+ 
     [SerializeField] private GameObject Prefab;
-    [SerializeField] private Score script1;
+    [SerializeField] private BlockScriptable BlockAudio;
     private int MovementStep = 0;
     private float elapsed = 0f;
     private bool active = true;
@@ -21,81 +20,74 @@ public class Controller : MonoBehaviour
             transform.position = transform.position + new Vector3(0, -1, 0);
         }
 
-        RaycastHit hit;
-        // Move Forward
-        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        //Vector3 forward = transform.TransformDirection(Vector3.forward) * .5f;
-        //Debug.DrawRay(transform.position, forward, Color.red);
-        if (Physics.Raycast(transform.position, Vector3.down, .6f))
-        {
-            //active = false;
-            Debug.Log("On Ground");    
-        }
-        else
-        {
-            Debug.Log("Not On Ground");
-        }
+        // Controls      
 
-        // Controls
-        if (Input.GetKeyDown("right"))
+        if (Input.GetKey("down"))
         {
-            if (MovementStep == 3)
-            {
-                reachedEnd.Play();
-            }
-            else
-            {
-                MovementStep += + 1;
-                transform.position = transform.position + new Vector3(1, 0, 0);
-                move.Play();
-            }
-           
+            elapsed += Time.deltaTime * 2;
+
         }
 
         if (Input.GetKeyDown("left"))
         {
             if (MovementStep == -3)
             {
-                reachedEnd.Play();
+                CubeManager.instance.reachedEnd.Play();
             }
             else
             {
                 MovementStep += - 1;
                 transform.position = transform.position + new Vector3(-1, 0, 0);
-                move.Play();
-            } 
+                CubeManager.instance.move.Play();
+            }
+        }
+
+        if (Input.GetKeyDown("right"))
+        {
+            if (MovementStep == 3)
+            {
+                CubeManager.instance.reachedEnd.Play();
+            }
+            else
+            {
+                MovementStep += +1;
+                transform.position = transform.position + new Vector3(1, 0, 0);
+                CubeManager.instance.move.Play();
+            }
+
         }
 
         if (Input.GetKeyDown("down"))
         {       
             transform.position = transform.position + new Vector3(0, -1, 0);
-            move.Play();
+            CubeManager.instance.move.Play();
         }
 
         if (Input.GetKeyDown("a"))
         {
             transform.Rotate(0f, 0f, 90f, Space.Self);
-            move.Play();
+            CubeManager.instance.RotateSound.Play();
+
         }
 
         if (Input.GetKeyDown("s"))
         {
             transform.Rotate(0f, 0f, -90f, Space.Self);
-            move.Play();        
+            CubeManager.instance.RotateSound.Play();
         }
     }
-
+    //On Screen Controls
     public void Right()
     {
         if (MovementStep == 3)
         {
-            reachedEnd.Play();
+            CubeManager.instance.reachedEnd.Play();
         }
         else
         {
             MovementStep = MovementStep + 1;
             transform.position = transform.position + new Vector3(1, 0, 0);
-            move.Play();
+            CubeManager.instance.move.Play();
         }
     }
 
@@ -103,13 +95,20 @@ public class Controller : MonoBehaviour
     {
         if (MovementStep == -3)
         {
-            reachedEnd.Play();
+            CubeManager.instance.reachedEnd.Play();
         }
         else
         {
             MovementStep = MovementStep - 1;
             transform.position = transform.position + new Vector3(-1, 0, 0);
-            move.Play();
+            CubeManager.instance.move.Play();
         }
+    }
+
+    private void OnTriggerEnter(Collider Col)
+    {
+        CubeManager.instance.BlockSetSound.Play();
+        GetComponent<Controller>().enabled = false;
+        Instantiate(CubeManager.instance.BlockArray[CubeManager.instance.SelectedCube], CubeManager.instance.BlockSpawnLocation.position, Quaternion.identity);
     }
 }
